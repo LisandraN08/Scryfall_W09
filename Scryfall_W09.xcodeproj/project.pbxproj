@@ -14,6 +14,7 @@
 		044DAE0F2AFDB879003AD369 /* Scryfall_W09Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044DAE0E2AFDB879003AD369 /* Scryfall_W09Tests.swift */; };
 		044DAE192AFDB879003AD369 /* Scryfall_W09UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044DAE182AFDB879003AD369 /* Scryfall_W09UITests.swift */; };
 		044DAE1B2AFDB879003AD369 /* Scryfall_W09UITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044DAE1A2AFDB879003AD369 /* Scryfall_W09UITestsLaunchTests.swift */; };
+		044DAE282AFDC0DF003AD369 /* WOT-Scryfall.json in Resources */ = {isa = PBXBuildFile; fileRef = 044DAE272AFDC0DF003AD369 /* WOT-Scryfall.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +45,7 @@
 		044DAE142AFDB879003AD369 /* Scryfall_W09UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Scryfall_W09UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		044DAE182AFDB879003AD369 /* Scryfall_W09UITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scryfall_W09UITests.swift; sourceTree = "<group>"; };
 		044DAE1A2AFDB879003AD369 /* Scryfall_W09UITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scryfall_W09UITestsLaunchTests.swift; sourceTree = "<group>"; };
+		044DAE272AFDC0DF003AD369 /* WOT-Scryfall.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = "WOT-Scryfall.json"; path = "../../../../../Downloads/WOT-Scryfall.json"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +99,7 @@
 				044DADFD2AFDB877003AD369 /* Scryfall_W09App.swift */,
 				044DADFF2AFDB877003AD369 /* ContentView.swift */,
 				044DAE012AFDB879003AD369 /* Assets.xcassets */,
+				044DAE272AFDC0DF003AD369 /* WOT-Scryfall.json */,
 				044DAE032AFDB879003AD369 /* Preview Content */,
 			);
 			path = Scryfall_W09;
@@ -233,6 +236,7 @@
 			files = (
 				044DAE052AFDB879003AD369 /* Preview Assets.xcassets in Resources */,
 				044DAE022AFDB879003AD369 /* Assets.xcassets in Resources */,
+				044DAE282AFDC0DF003AD369 /* WOT-Scryfall.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
