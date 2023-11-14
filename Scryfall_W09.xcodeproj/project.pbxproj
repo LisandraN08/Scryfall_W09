@@ -15,6 +15,7 @@
 		044DAE192AFDB879003AD369 /* Scryfall_W09UITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044DAE182AFDB879003AD369 /* Scryfall_W09UITests.swift */; };
 		044DAE1B2AFDB879003AD369 /* Scryfall_W09UITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 044DAE1A2AFDB879003AD369 /* Scryfall_W09UITestsLaunchTests.swift */; };
 		044DAE282AFDC0DF003AD369 /* WOT-Scryfall.json in Resources */ = {isa = PBXBuildFile; fileRef = 044DAE272AFDC0DF003AD369 /* WOT-Scryfall.json */; };
+		04DC57962B0276F6000F4507 /* Algorithms in Frameworks */ = {isa = PBXBuildFile; productRef = 04DC57952B0276F6000F4507 /* Algorithms */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				04DC57962B0276F6000F4507 /* Algorithms in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,6 +148,9 @@
 			dependencies = (
 			);
 			name = Scryfall_W09;
+			packageProductDependencies = (
+				04DC57952B0276F6000F4507 /* Algorithms */,
+			);
 			productName = Scryfall_W09;
 			productReference = 044DADFA2AFDB877003AD369 /* Scryfall_W09.app */;
 			productType = "com.apple.product-type.application";
@@ -218,6 +223,9 @@
 				Base,
 			);
 			mainGroup = 044DADF12AFDB877003AD369;
+			packageReferences = (
+				04DC57942B0276F6000F4507 /* XCRemoteSwiftPackageReference "swift-algorithms" */,
+			);
 			productRefGroup = 044DADFB2AFDB877003AD369 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -592,6 +600,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		04DC57942B0276F6000F4507 /* XCRemoteSwiftPackageReference "swift-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		04DC57952B0276F6000F4507 /* Algorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 04DC57942B0276F6000F4507 /* XCRemoteSwiftPackageReference "swift-algorithms" */;
+			productName = Algorithms;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 044DADF22AFDB877003AD369 /* Project object */;
 }
