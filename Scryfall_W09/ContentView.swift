@@ -14,10 +14,12 @@ struct Card: Codable, Hashable {
     let name: String
     let type_line: String
     let oracle_text: String
+    let mana_cost: String
     let image_uris: ImageURIs
     let prices: Prices
     let legalities: [String: String]
     let games: [String]
+    let collector_number: String
 
 
     func hash(into hasher: inout Hasher) {
@@ -28,6 +30,7 @@ struct Card: Codable, Hashable {
         return lhs.image_uris.large == rhs.image_uris.large
     }
 }
+
 
 struct Prices: Codable {
     let usd: String?
@@ -66,6 +69,11 @@ class ImageLoader: ObservableObject {
     }
 }
 
+enum SortMode {
+    case alphabetical
+    case numeric
+}
+
 struct ContentView: View {
     @State private var gridLayout = [GridItem(.adaptive(minimum: 50))]
     @State private var isShowingDetail = false
@@ -74,9 +82,28 @@ struct ContentView: View {
     @State private var cards: [Card]
     @State private var isAscendingOrder = true
     @State private var cachedImages: [String: UIImage] = [:]
+    @State private var sortMode: SortMode = .alphabetical
     
     var sortedCards: [Card] {
-        return isAscendingOrder ? filteredCards.sorted(by: { $0.name < $1.name }) : filteredCards.sorted(by: { $0.name > $1.name })
+        return isAscendingOrder ? filteredCards.sorted { card1, card2 in
+            if sortMode == .alphabetical {
+                return card1.name < card2.name
+            } else {
+                guard let number1 = Int(card1.collector_number), let number2 = Int(card2.collector_number) else {
+                    return card1.name < card2.name
+                }
+                return number1 < number2
+            }
+        } : filteredCards.sorted { card1, card2 in
+            if sortMode == .alphabetical {
+                return card1.name > card2.name
+            } else {
+                guard let number1 = Int(card1.collector_number), let number2 = Int(card2.collector_number) else {
+                    return card1.name > card2.name
+                }
+                return number1 > number2
+            }
+        }
     }
     
     var filteredCards: [Card] {
@@ -101,6 +128,13 @@ struct ContentView: View {
         }
     }
 
+    func getPreviousCardDetails() {
+        if let currentIndex = sortedCards.firstIndex(of: selectedCard!) {
+            let previousIndex = (currentIndex - 1 + sortedCards.count) % sortedCards.count
+            selectedCard = sortedCards[previousIndex]
+        }
+    }
+
     var body: some View {
         NavigationView {
             TabView {
@@ -122,23 +156,45 @@ struct ContentView: View {
                         
                         Menu {
                             Button(action: {
+                                // Sort A-Z (ascending alphabet)
                                 isAscendingOrder = true
+                                sortMode = .alphabetical
                             }) {
                                 Label("Sort A-Z", systemImage: "arrow.up")
                             }
-                            
+
                             Button(action: {
+                                // Sort Z-A (descending alphabet)
                                 isAscendingOrder = false
+                                sortMode = .alphabetical
                             }) {
                                 Label("Sort Z-A", systemImage: "arrow.down")
                             }
-                            
 
+                            Divider()
+
+                            Button(action: {
+                                // Sort by Collector Number Ascending
+                                isAscendingOrder = true
+                                sortMode = .numeric
+                            }) {
+                                Label("Sort by Collector Number Ascending", systemImage: "number")
+                            }
+
+                            Button(action: {
+                                // Sort by Collector Number Descending
+                                isAscendingOrder = false
+                                sortMode = .numeric
+                            }) {
+                                Label("Sort by Collector Number Descending", systemImage: "arrow.down.number")
+                            }
                         } label: {
-                            Image(systemName:"slider.horizontal.3")
+                            Image(systemName: "slider.horizontal.3")
                                 .foregroundColor(.white)
                                 .padding()
                         }
+
+
                     }
                     Spacer()
                     
@@ -149,9 +205,15 @@ struct ContentView: View {
                         ], spacing: 10) {
                             ForEach(sortedCards, id: \.self) { card in
                                 VStack(spacing: 8) {
-                                    NavigationLink(destination: CardDetailsView(card: card, onNextCardTapped: {
-                                        getNextCardDetails()
-                                    })) {
+                                    NavigationLink(destination: CardDetailsView(
+                                        card: card,
+                                        onNextCardTapped: {
+                                            getNextCardDetails()
+                                        },
+                                        onPreviousCardTapped: {
+                                            getPreviousCardDetails()
+                                        }
+                                    )) {
                                         CardImageView(card: card, cachedImages: $cachedImages)
                                     }
                                 }
@@ -217,6 +279,8 @@ struct ContentView: View {
                 .navigationViewStyle(StackNavigationViewStyle())
         }
     }
+    
+    
 }
 
 
@@ -299,6 +363,8 @@ struct CardDetailsView: View {
     @State private var selectedButton: String = "Versions"
     
     var onNextCardTapped: (() -> Void)?
+    var onPreviousCardTapped: (() -> Void)?
+
 
     
     var body: some View {
@@ -307,57 +373,103 @@ struct CardDetailsView: View {
                 VStack {
                     if let card = card, let url = URL(string: card.image_uris.art_crop) {
                         GeometryReader { geometry in
-                            AsyncImage(url: url) { phase in
-                                switch phase {
-                                case .success(let image):
-                                    image
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: geometry.size.width, height: geometry.size.height * 0.8)
-                                        .clipped()
-                                        .onTapGesture {
-                                            isImageZoomed.toggle()
-                                        }
-                                        .sheet(isPresented: $isImageZoomed) {
-                                            // Show the larger image when tapped
-                                            AsyncImage(url: URL(string: card.image_uris.border_crop)) { phase in
-                                                switch phase {
-                                                case .success(let largeImage):
-                                                    largeImage
-                                                        .resizable()
-                                                        .aspectRatio(contentMode: .fit)
-                                                default:
-                                                    ProgressView()
-                                                }
+                            ZStack {
+                                // Your original image with blur background
+                                AsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: geometry.size.width, height: geometry.size.height * 0.8)
+                                            .clipped()
+                                            .blur(radius: isImageZoomed ? 10 : 0) // Apply blur when zoomed
+                                            .onTapGesture {
+                                                isImageZoomed.toggle()
+                                            }
+                                    default:
+                                        ProgressView()
+                                    }
+                                }
+                                .frame(width: geometry.size.width, height: geometry.size.height * 0.8)
+
+                                // Centered large image
+                                if isImageZoomed {
+                                    VStack {
+                                        Spacer()
+                                        AsyncImage(url: URL(string: card.image_uris.large)) { phase in
+                                            switch phase {
+                                            case .success(let largeImage):
+                                                largeImage
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fit)
+                                                    .frame(maxHeight: .infinity)
+                                                    .background(GeometryReader { proxy in
+                                                        Color.clear
+                                                            .alignmentGuide(HorizontalAlignment.center) { dimensions in
+                                                                dimensions[HorizontalAlignment.center]
+                                                            }
+                                                            .alignmentGuide(VerticalAlignment.center) { dimensions in
+                                                                dimensions[VerticalAlignment.center]
+                                                            }
+                                                    })
+                                            default:
+                                                ProgressView()
                                             }
                                         }
-                                default:
-                                    ProgressView()
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.white)
+                                        .cornerRadius(16)
+                                        Spacer()
+                                    }
+                                    .padding()
                                 }
+                            }
+                            .onTapGesture {
+                                isImageZoomed.toggle()
                             }
                             .frame(height: UIScreen.main.bounds.height * 0.4)
                         }
                         .frame(height: UIScreen.main.bounds.height * 0.4)
                     }
 
+
                     VStack(alignment: .leading) {
-                        Text(card?.name ?? "")
-                            .font(.title2)
-                            .bold()
-                            .foregroundColor(.white) // Set warna teks
+                        HStack {
+                            Text(card?.name ?? "")
+                                .font(.title2)
+                                .bold()
+                                .foregroundColor(.white)
+                            Spacer() // Spacer agar mana_cost rata kanan
+                            Text(card?.mana_cost ?? "")
+                                manaCostOverlay()
+                        }
                         Text(card?.type_line ?? "")
                             .font(.headline)
-                            .foregroundColor(.white) // Set warna teks
+                            .foregroundColor(.white)
                         Text(card?.oracle_text ?? "")
                             .font(.caption)
                             .padding()
-                            .foregroundColor(.white) // Set warna teks
+                            .foregroundColor(.white)
                     }
                     .multilineTextAlignment(.leading)
                     .padding()
                     .background(Color.black)
+
                     
                     HStack {
+                        Button(action: {
+                            // Previous card button tapped
+                            onPreviousCardTapped?()
+                        }) {
+                            Image(systemName: "chevron.left.circle.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
+                                .padding()
+                        }
+
+                        Spacer()
 
                         Button(action: {
                             // Logic untuk tombol Versions
@@ -388,6 +500,18 @@ struct CardDetailsView: View {
                                     RoundedRectangle(cornerRadius: 20)
                                         .stroke(Color.gray, lineWidth: 0.2) // Border color and width
                                 )
+                        }
+                        
+                        Spacer()
+
+                        Button(action: {
+                            // Next card button tapped
+                            onNextCardTapped?()
+                        }) {
+                            Image(systemName: "chevron.right.circle.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
+                                .padding()
                         }
                         
 
@@ -439,16 +563,26 @@ struct CardDetailsView: View {
                                 .bold()
                                 .padding(.bottom, 8)
                                 .foregroundColor(.blue)
+                            
                             ForEach(legalities.sorted(by: { $0.key < $1.key }), id: \.key) { legality in
-                                       HStack {
-                                           Text(legality.key.capitalized.replacingOccurrences(of: "_", with: " "))
-                                           Spacer()
+                                HStack {
+                                    Text(legality.key.capitalized.replacingOccurrences(of: "_", with: " "))
+                                    Spacer()
 
-                                           // Handle "Not_Legal" case
-                                           Text(legality.value.capitalized == "Not_Legal" ? "Not Legal" : legality.value.capitalized)
-                                               .foregroundColor(legality.value == "legal" ? .green : .red)
-                                       }
-                                   }.foregroundColor(.white)
+                                    // Handle "Not_Legal" case
+                                    Text(legality.value.capitalized == "Not_Legal" ? "Not Legal" : legality.value.capitalized)
+                                        .foregroundColor(legality.value == "legal" ? .white : .white)
+                                        .padding(.horizontal, 10) // Add horizontal padding to text
+                                        .background(RoundedRectangle(cornerRadius: 5)
+                                            .fill(legality.value == "legal" ? Color.green : Color.gray))
+                                    
+                                        .padding(.horizontal, 8) // Adjust horizontal padding around the RoundedRectangle
+
+                                }
+                                .foregroundColor(.white)
+                                .padding(.vertical, 4)
+                                // Add vertical padding to the HStack
+                            }
                         }
                         .padding()
                         .background(Color.gray.opacity(0.2))
@@ -472,7 +606,83 @@ struct CardDetailsView: View {
             .background(Color.black)
         }
     }
+    
+    private func manaImageName(for symbol: String) -> String? {
+        switch symbol {
+        case "{1}":
+            return "one"
+        case "{2}":
+            return "two"
+        case "{3}":
+            return "three"
+        case "{4}":
+            return "four"
+        case "{7}":
+            return "seven"
+        case "{W}":
+            return "white"
+        case "{B}":
+            return "black"
+        case "{U}":
+            return "blue"
+        case "{R}":
+            return "red"
+        case "{G}":
+            return "green"
+        default:
+            return nil
+        }
+    }
+
+    private func manaCostOverlay() -> some View {
+        guard let manaCost = card?.mana_cost else {
+            return AnyView(EmptyView()) // Return an empty view if mana_cost is nil
+        }
+
+        return AnyView(
+            HStack(spacing: 2) {
+                ForEach(manaSymbols(for: manaCost), id: \.self) { symbol in
+                    if let imageName = manaImageName(for: symbol) {
+                        Image(imageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                    } else {
+                        Text(symbol)
+                            .font(.system(size: 12))
+                            .padding(2)
+                            .background(Color.white)
+                            .clipShape(Circle())
+                            .overlay(Circle().stroke(Color.black, lineWidth: 1))
+                    }
+                }
+            }
+            .padding(4)
+        )
+    }
+
+    private func manaSymbols(for manaCost: String) -> [String] {
+        var symbols: [String] = []
+        var currentSymbol = ""
+
+        for char in manaCost {
+            if char == "{" {
+                currentSymbol = "{"
+            } else if char == "}" {
+                currentSymbol += "}"
+                symbols.append(currentSymbol)
+                currentSymbol = ""
+            } else {
+                currentSymbol.append(char)
+            }
+        }
+
+        return symbols
+    }
+
+
 }
+
 struct AsyncImageLoader: View {
     @ObservedObject private var imageLoader: ImageLoader
     private var onSuccess: ((UIImage) -> Void)?
