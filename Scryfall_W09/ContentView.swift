@@ -382,8 +382,6 @@ struct CardDetailsView: View {
     var onNextCardTapped: (() -> Void)?
     var onPreviousCardTapped: (() -> Void)?
 
-
-    
     var body: some View {
         NavigationView {
             ScrollView {
@@ -475,17 +473,17 @@ struct CardDetailsView: View {
 
                     
                     HStack {
-                        Button(action: {
-                            // Previous card button tapped
-                            onPreviousCardTapped?()
-                        }) {
-                            Image(systemName: "chevron.left.circle.fill")
-                                .font(.title)
-                                .foregroundColor(colorScheme == .dark ? .white : .black)
-                                .padding()
-                        }
-
-                        Spacer()
+//                        Button(action: {
+//                            // Previous card button tapped
+//                            onPreviousCardTapped?()
+//                        }) {
+//                            Image(systemName: "chevron.left.circle.fill")
+//                                .font(.title)
+//                                .foregroundColor(colorScheme == .dark ? .white : .black)
+//                                .padding()
+//                        }
+//
+//                        Spacer()
 
                         Button(action: {
                             // Logic untuk tombol Versions
@@ -518,18 +516,18 @@ struct CardDetailsView: View {
                                 )
                         }
                         
-                        Spacer()
-
-                        Button(action: {
-                            // Next card button tapped
-                            onNextCardTapped?()
-                        }) {
-                            Image(systemName: "chevron.right.circle.fill")
-                                .font(.title)
-                                .foregroundColor(colorScheme == .dark ? .white : .black)
-                                .padding()
-                        }
-                        
+//                        Spacer()
+//
+//                        Button(action: {
+//                            // Next card button tapped
+//                            onNextCardTapped?()
+//                        }) {
+//                            Image(systemName: "chevron.right.circle.fill")
+//                                .font(.title)
+//                                .foregroundColor(colorScheme == .dark ? .white : .black)
+//                                .padding()
+//                        }
+//                        
 
 
                     }
@@ -762,5 +760,3 @@ extension ContentView {
     
 
 }
-
-
