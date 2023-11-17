@@ -83,6 +83,7 @@ struct ContentView: View {
     @State private var isAscendingOrder = true
     @State private var cachedImages: [String: UIImage] = [:]
     @State private var sortMode: SortMode = .alphabetical
+    @State private var colorScheme: ColorScheme = .dark
     
     var sortedCards: [Card] {
         return isAscendingOrder ? filteredCards.sorted { card1, card2 in
@@ -140,7 +141,7 @@ struct ContentView: View {
             TabView {
                 VStack {
                     Text("Scryfall")
-                        .foregroundColor(.white)
+                        .foregroundColor(colorScheme == .dark ? .white : .black)
                         .font(.largeTitle)
                         .padding(.bottom, 10)
                     HStack {
@@ -148,7 +149,7 @@ struct ContentView: View {
                         SearchBar(text: $searchText)
                             .padding(4)
                             .background(Color(.systemGray6))
-                            .foregroundColor(.black)
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
                             .cornerRadius(8)
                             .frame(minWidth: 0, maxWidth: 600) // Set the frame to make it expand to the maximum width
                             .padding(.horizontal)
@@ -190,7 +191,7 @@ struct ContentView: View {
                             }
                         } label: {
                             Image(systemName: "slider.horizontal.3")
-                                .foregroundColor(.white)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .padding()
                         }
 
@@ -229,12 +230,16 @@ struct ContentView: View {
                         gridLayout = [GridItem(.adaptive(minimum: screenWidth / 3))]
                         UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor.white]
                     }
+                    .background(colorScheme == .dark ? Color.black : Color.white)
+                    Toggle("Dark Mode", isOn: colorSchemeToggle)
+                                        .toggleStyle(SwitchToggleStyle(tint: .orange))
+                                        .padding()
                 }
-                .background(Color.black)
+                .background(colorScheme == .dark ? Color.black : Color.white)
                     .tabItem {
                         Label("Home", systemImage: "house")
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
 
                     // In Development 1
                     ZStack {
@@ -268,16 +273,27 @@ struct ContentView: View {
                         Label("In Development 3", systemImage: "person")
                     }
                 }
-                .background(Color.black) // Set the background color of the TabView
-                .accentColor(.white)
+                .background(colorScheme == .dark ? Color.black : Color.white) // Set the background color of the TabView
+                .accentColor(colorScheme == .dark ? .white : .black) // Set accent color dynamically
                 .onAppear {
                     let tabBarAppearance = UITabBar.appearance()
-                    tabBarAppearance.barTintColor = .black
+                    tabBarAppearance.barTintColor = colorScheme == .dark ? UIColor.black : UIColor.white // Set background color dynamically
                 }
-                .accentColor(.white)
+                .accentColor(colorScheme == .dark ? .white : .black) // Set accent color dynamically
                 .navigationBarHidden(true)
                 .navigationViewStyle(StackNavigationViewStyle())
+                .preferredColorScheme(colorScheme)
+            
         }
+    }
+    
+    public var colorSchemeToggle: Binding<Bool> {
+        Binding(
+            get: { colorScheme == .dark },
+            set: {
+                colorScheme = $0 ? .dark : .light
+            }
+        )
     }
     
     
@@ -361,6 +377,7 @@ struct CardDetailsView: View {
     @Environment(\.presentationMode) var presentationMode
     @State private var isImageZoomed = false
     @State private var selectedButton: String = "Versions"
+    @Environment(\.colorScheme) var colorScheme
     
     var onNextCardTapped: (() -> Void)?
     var onPreviousCardTapped: (() -> Void)?
@@ -440,22 +457,21 @@ struct CardDetailsView: View {
                             Text(card?.name ?? "")
                                 .font(.title2)
                                 .bold()
-                                .foregroundColor(.white)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
                             Spacer() // Spacer agar mana_cost rata kanan
-                            Text(card?.mana_cost ?? "")
-                                manaCostOverlay()
+                            manaCostOverlay()
                         }
                         Text(card?.type_line ?? "")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
                         Text(card?.oracle_text ?? "")
                             .font(.caption)
                             .padding()
-                            .foregroundColor(.white)
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
                     }
                     .multilineTextAlignment(.leading)
                     .padding()
-                    .background(Color.black)
+                    .foregroundColor(colorScheme == .dark ? .white : .black)
 
                     
                     HStack {
@@ -465,7 +481,7 @@ struct CardDetailsView: View {
                         }) {
                             Image(systemName: "chevron.left.circle.fill")
                                 .font(.title)
-                                .foregroundColor(.white)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .padding()
                         }
 
@@ -510,7 +526,7 @@ struct CardDetailsView: View {
                         }) {
                             Image(systemName: "chevron.right.circle.fill")
                                 .font(.title)
-                                .foregroundColor(.white)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .padding()
                         }
                         
@@ -532,22 +548,22 @@ struct CardDetailsView: View {
                                 Text("USD: \(prices.usd ?? "N/A")")
                                     .padding(.bottom, 4)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(colorScheme == .dark ? .white : .black)
 
                                 Text("USD Foil: \(prices.usd_foil ?? "N/A")")
                                     .padding(.bottom, 4)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(colorScheme == .dark ? .white : .black)
 
                                 Text("EUR: \(prices.eur ?? "N/A")")
                                     .padding(.bottom, 4)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(colorScheme == .dark ? .white : .black)
 
                                 Text("EUR Foil: \(prices.eur_foil ?? "N/A")")
                                     .padding(.bottom, 4)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(colorScheme == .dark ? .white : .black)
                             }
                             Spacer()
                         }
@@ -579,7 +595,7 @@ struct CardDetailsView: View {
                                         .padding(.horizontal, 8) // Adjust horizontal padding around the RoundedRectangle
 
                                 }
-                                .foregroundColor(.white)
+                                .foregroundColor(colorScheme == .dark ? .white : .black)
                                 .padding(.vertical, 4)
                                 // Add vertical padding to the HStack
                             }
@@ -591,19 +607,9 @@ struct CardDetailsView: View {
                 }
                 .padding()
                 .navigationBarTitleDisplayMode(.inline)
-                .navigationTitle(Text(card?.name ?? "") .foregroundColor(.black))
-                .navigationBarItems(
-                    leading:
-                        Button(action: {
-                            // Action untuk kembali ke home
-                            presentationMode.wrappedValue.dismiss()
-                        }) {
-                            Image(systemName: "arrow.left")
-                                .foregroundColor(.blue)
-                        }
-                )
+                .navigationTitle(Text(card?.name ?? "") .foregroundColor(colorScheme == .dark ? .white : .black))
             }
-            .background(Color.black)
+            .background(colorScheme == .dark ? Color.black : Color.white)
         }
     }
     
@@ -647,13 +653,6 @@ struct CardDetailsView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fit)
                             .frame(width: 20, height: 20)
-                    } else {
-                        Text(symbol)
-                            .font(.system(size: 12))
-                            .padding(2)
-                            .background(Color.white)
-                            .clipShape(Circle())
-                            .overlay(Circle().stroke(Color.black, lineWidth: 1))
                     }
                 }
             }
@@ -721,6 +720,7 @@ struct AsyncImageLoader: View {
 
 struct SearchBar: View {
     @Binding var text: String
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         HStack {
@@ -728,7 +728,7 @@ struct SearchBar: View {
                 .padding(8)
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
-                .foregroundColor(.black)
+                .foregroundColor(colorScheme == .dark ? .white : .black)
 
             Button(action: {
                 text = ""
